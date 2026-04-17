@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-12">
+  <div class="glass rounded-3xl p-8 border border-slate-700/30 shadow-xl anim-fade-up">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-3xl font-bold">Scan Patient QR Code</h1>
+        <p class="text-slate-400 mt-2">Use your webcam to scan a patient QR code and access their medical history securely.</p>
+      </div>
+      <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 text-blue-300 text-sm border border-blue-500/20">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2h2V5h2V3H5zm10 0h-2v2h2v2h2V5a2 2 0 00-2-2zM3 13v2a2 2 0 002 2h2v-2H5v-2H3zm14 0h-2v2h-2v2h2a2 2 0 002-2v-2z"/></svg>
+        Live scan enabled
+      </span>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+      <div class="glass rounded-3xl p-6 border border-slate-700/30">
+        <div class="grid gap-4">
+          <div class="rounded-3xl overflow-hidden border border-slate-700/30 bg-slate-950/80">
+            <video id="qr-video" autoplay playsinline muted class="w-full h-72 bg-black object-cover"></video>
+            <canvas id="qr-canvas" class="hidden"></canvas>
+          </div>
+
+          <div class="grid gap-3 md:grid-cols-2">
+            <button id="startScanner" type="button" class="btn btn-blue w-full">Start Camera</button>
+            <button id="stopScanner" type="button" class="btn btn-ghost w-full">Stop Camera</button>
+          </div>
+
+          <div class="glass rounded-2xl p-4 border border-slate-700/30 bg-slate-900/80">
+            <p class="text-slate-300 font-medium">Scanner status</p>
+            <p id="scannerStatus" class="text-sm text-slate-400 mt-2">Click &ldquo;Start Camera&rdquo; to begin scanning.</p>
+          </div>
+
+          <div class="glass rounded-2xl p-4 border border-slate-700/30 bg-slate-900/80">
+            <p class="text-slate-300 font-medium">Patient ID</p>
+            <input id="patientID" type="text" name="patient_id" placeholder="Scanned patient ID will appear here" class="w-full rounded-2xl border border-slate-700/50 bg-slate-950/80 px-4 py-3 text-slate-100 focus:outline-none" readonly />
+            <div class="mt-4 flex gap-3 flex-col sm:flex-row">
+              <button id="submitID" type="button" class="btn btn-blue w-full sm:w-auto">Access Patient Record</button>
+              <button id="clearID" type="button" class="btn btn-ghost w-full sm:w-auto">Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div class="glass rounded-3xl p-6 border border-slate-700/30 bg-slate-950/80">
+          <h2 class="text-xl font-semibold text-slate-200 mb-3">How it works</h2>
+          <ul class="space-y-2 text-slate-400 text-sm">
+            <li>• Each patient gets a unique QR code on registration.</li>
+            <li>• The QR encodes the patient's ID for quick access.</li>
+            <li>• Point your webcam at the patient's QR code to scan it.</li>
+            <li>• The system opens their secure medical history page.</li>
+          </ul>
+        </div>
+
+        <div class="glass rounded-3xl p-6 border border-slate-700/30 bg-slate-950/80">
+          <h2 class="text-xl font-semibold text-slate-200 mb-3">When analyzing reports</h2>
+          <p class="text-slate-400 text-sm">While reviewing a patient's report, scan their QR code to instantly pull up their complete medical history, including past reports and uploaded medical documents.</p>
+        </div>
+
+        <div class="glass rounded-3xl p-6 border border-slate-700/30 bg-slate-950/80">
+          <h2 class="text-xl font-semibold text-slate-200 mb-3">Security</h2>
+          <p class="text-slate-400 text-sm">Only authenticated doctors can scan and view patient records. The QR code is doctor-exclusive and routes to a secure endpoint.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script>
+const video = document.getElementById('qr-video');
+const canvas = document.getElementById('qr-canvas');
+const scannerStatus = document.getElementById('scannerStatus');
+const patientID = document.getElementById('patientID');
+const startScanner = document.getElementById('startScanner');
+const stopScanner = document.getElementById('stopScanner');
+const submitID = document.getElementById('submitID');
+const clearID = document.getElementById('clearID');
+const ctx = canvas.getContext('2d');
+let stream = null;
+let scanning = false;
+let barcodeDetector = null;
+
+async function setStatus(message, color = 'text-slate-400') {
+  scannerStatus.textContent = message;
+  scannerStatus.className = 'text-sm mt-2 ' + color;
+}
+
+async function buildDetector() {
+  if ('BarcodeDetector' in window) {
+    const supported = await BarcodeDetector.getSupportedFormats();
+    if (supported.includes('qr_code')) {
+      return new BarcodeDetector({ formats: ['qr_code'] });
+    }
+  }
+  return null;
+}
+
+async function startCamera() {
+  if (scanning) return;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    video.srcObject = stream;
+    await video.play();
+    scanning = true;
+    setStatus('📹 Camera started. Point the QR code at the camera.', 'text-blue-400');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    scanLoop();
+  } catch (err) {
+    setStatus('❌ Unable to access camera: ' + err.message, 'text-rose-400');
+  }
+}
+
+function stopCamera() {
+  if (!scanning) return;
+  scanning = false;
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+    stream = null;
+  }
+  video.pause();
+  video.srcObject = null;
+  setStatus('⏹️ Camera stopped.');
+}
+
+async function scanLoop() {
+  if (!scanning) return;
+  if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+    requestAnimationFrame(scanLoop);
+    return;
+  }
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+  let qrText = null;
+  try {
+    if (barcodeDetector) {
+      const barcodes = await barcodeDetector.detect(imageData);
+      if (barcodes.length > 0) {
+        qrText = barcodes[0].rawValue;
+      }
+    } else {
+      const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'attemptBoth' });
+      if (code) qrText = code.data;
+    }
+  } catch (error) {
+    console.warn('QR scan error:', error);
+  }
+
+  if (qrText) {
+    // Extract patient ID from URL: http://127.0.0.1:5000/scan_patient_qr/5
+    const match = qrText.match(/scan_patient_qr\/(\d+)/);
+    if (match) {
+      patientID.value = match[1];
+      setStatus('✅ QR code detected. Patient ID: ' + match[1], 'text-emerald-400');
+      stopCamera();
+      return;
+    } else {
+      // If it's just a number, use it directly
+      if (/^\d+$/.test(qrText.trim())) {
+        patientID.value = qrText.trim();
+        setStatus('✅ Patient ID scanned: ' + qrText.trim(), 'text-emerald-400');
+        stopCamera();
+        return;
+      }
+    }
+  }
+
+  requestAnimationFrame(scanLoop);
+}
+
+startScanner.addEventListener('click', async () => {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    setStatus('❌ Camera access not supported by this browser.', 'text-rose-400');
+    return;
+  }
+  if (!barcodeDetector && 'BarcodeDetector' in window) {
+    barcodeDetector = await buildDetector();
+  }
+  if (!barcodeDetector && typeof jsQR === 'undefined') {
+    setStatus('❌ QR scanning library not available.', 'text-rose-400');
+    return;
+  }
+  startCamera();
+});
+
+stopScanner.addEventListener('click', () => {
+  stopCamera();
+});
+
+submitID.addEventListener('click', () => {
+  if (!patientID.value.trim()) {
+    setStatus('⚠️ Enter or scan a patient ID first.', 'text-amber-400');
+    return;
+  }
+  const patientId = patientID.value.trim();
+  window.location.href = '/scan_patient_qr/' + patientId;
+});
+
+clearID.addEventListener('click', () => {
+  patientID.value = '';
+  setStatus('🔄 Scanner ready.');
+});
+</script>
+{% endblock %}

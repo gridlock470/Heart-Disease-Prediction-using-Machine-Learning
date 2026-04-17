@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-12">
+
+  <!-- Header -->
+  <div style="text-align:center; margin-bottom:4rem;">
+    <span class="badge badge-rose anim-fade-up" style="margin-bottom:1rem; font-size:0.8rem;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      Get In Touch
+    </span>
+    <h1 class="anim-fade-up delay-1" style="font-size:2.5rem; font-weight:800; margin-bottom:1rem;">
+      Contact <span class="text-grad-rose">HeartGuard</span>
+    </h1>
+    <p class="anim-fade-up delay-2" style="color:var(--text-dim); font-size:1rem; max-width:500px; margin:0 auto; line-height:1.7;">
+      Questions about your heart health? Need technical support? We're here to help.
+    </p>
+  </div>
+
+  <!-- Info Cards Row -->
+  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; margin-bottom:3rem;" class="contact-grid-top">
+    {% for icon_path, color, bg, title, info in [
+      ('M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z','#14b8a6','rgba(20,184,166,0.12)','Support Lines','📱 8708405576 | 7081792624'),
+      ('M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z','#f43f5e','rgba(244,63,94,0.12)','Email Us','arjunahlawat83@gmail.com\n/ anujpatwa30@gmail.com'),
+      ('M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z','#3b82f6','rgba(59,130,246,0.12)','Location','India'),
+    ] %}
+    <div class="contact-card glass-card anim-fade-up" style="background:{{ bg }}; border:1px solid {{ color }}22; transition-delay:{{ loop.index0 * 0.1 }}s;">
+      <div class="contact-icon-wrap" style="background:{{ color }}1a; border:1px solid {{ color }}33;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ color }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ icon_path }}"/></svg>
+      </div>
+      <h3 style="font-size:0.9rem; font-weight:700; margin-bottom:0.35rem;">{{ title }}</h3>
+      <p style="color:var(--text-dim); font-size:0.85rem; white-space:pre-wrap;">{{ info }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Main Grid: Form + Extra Info -->
+  <div style="display:grid; grid-template-columns:1fr 380px; gap:2rem; align-items:start;" class="contact-main-grid">
+
+    <!-- ══ Contact Form ══ -->
+    <div class="glass-card anim-fade-up delay-2" style="border-radius:var(--radius-2xl); padding:2.5rem; position:relative; overflow:hidden;">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--rose),var(--purple),var(--blue));"></div>
+
+      <h2 style="font-size:1.3rem; font-weight:800; margin-bottom:0.5rem;">Send a Message</h2>
+      <p style="color:var(--text-dim); font-size:0.88rem; margin-bottom:2rem;">We typically respond within 24 hours.</p>
+
+      <form method="POST" action="{{ url_for('contact') }}" style="display:flex; flex-direction:column; gap:1.25rem;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+          <div>
+            <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.5rem;">Your Name *</label>
+            <input type="text" name="name" required placeholder="Full name" class="input-field"
+                   value="{{ current_user.name if current_user.is_authenticated else '' }}">
+          </div>
+          <div>
+            <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.5rem;">Email *</label>
+            <input type="email" name="email" required placeholder="you@example.com" class="input-field"
+                   value="{{ current_user.email if current_user.is_authenticated else '' }}">
+          </div>
+        </div>
+
+        <div>
+          <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.5rem;">Subject</label>
+          <select name="subject" class="input-field">
+            <option value="General Inquiry">General Inquiry</option>
+            <option value="Technical Support">Technical Support</option>
+            <option value="Medical Question">Medical Question</option>
+            <option value="Account Issue">Account Issue</option>
+            <option value="Partnership">Partnership</option>
+            <option value="Feedback">Feedback</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.5rem;">Message *</label>
+          <textarea name="message" required placeholder="Describe your question or concern..." class="input-field" rows="5"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-rose" style="font-size:0.95rem; padding:0.85rem 2rem; width:fit-content;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Send Message
+        </button>
+      </form>
+    </div>
+
+    <!-- ══ Side Info ══ -->
+    <div style="display:flex; flex-direction:column; gap:1.25rem;">
+
+      <!-- Hours -->
+      <div class="glass-card anim-fade-up delay-3" style="border-radius:var(--radius-2xl); padding:1.75rem;">
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.25rem;">
+          <div style="width:36px;height:36px;border-radius:0.75rem;background:rgba(245,158,11,0.15);display:flex;align-items:center;justify-content:center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h3 style="font-size:0.95rem; font-weight:700;">Support Hours</h3>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:0.6rem;">
+          {% for day, time in [('Monday – Friday','9:00 AM – 6:00 PM'),('Saturday','10:00 AM – 4:00 PM'),('Sunday','Emergency only')] %}
+          <div style="display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+            <span style="font-size:0.83rem; color:var(--text-dim);">{{ day }}</span>
+            <span style="font-size:0.83rem; color:var(--text-main);">{{ time }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Emergency -->
+      <div class="glass-rose anim-fade-up delay-4" style="border-radius:var(--radius-2xl); padding:1.75rem;">
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem;">
+          <div style="width:36px;height:36px;border-radius:0.75rem;background:rgba(244,63,94,0.2);display:flex;align-items:center;justify-content:center;animation:heart-beat 1.4s infinite;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#f43f5e"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/></svg>
+          </div>
+          <h3 style="font-size:0.95rem; font-weight:700; color:var(--rose-light);">Cardiac Emergency</h3>
+        </div>
+        <p style="font-size:0.85rem; color:var(--text-dim); line-height:1.65; margin-bottom:1rem;">If you're experiencing chest pain, shortness of breath, or other cardiac symptoms, please call emergency services immediately.</p>
+        <div style="font-size:1.25rem; font-weight:800; color:var(--rose-light);">📞 112</div>
+        <div style="font-size:0.78rem; color:var(--text-dim); margin-top:0.25rem;">India Emergency Services</div>
+      </div>
+
+      <!-- FAQ Link -->
+      <div class="glass-card anim-fade-up delay-5" style="border-radius:var(--radius-2xl); padding:1.5rem; text-align:center;">
+        <div style="font-size:2rem; margin-bottom:0.75rem;">🤔</div>
+        <h3 style="font-size:0.95rem; font-weight:700; margin-bottom:0.5rem;">Have Questions?</h3>
+        <p style="font-size:0.83rem; color:var(--text-dim); margin-bottom:1rem;">Check our Help Center for instant answers to common questions.</p>
+        <a href="{{ url_for('help_page') }}" class="btn btn-ghost" style="font-size:0.85rem; padding:0.55rem 1.25rem; width:100%;">View Help Center</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+@media(max-width:900px){
+  .contact-main-grid  { grid-template-columns:1fr !important; }
+  .contact-grid-top   { grid-template-columns:1fr !important; }
+}
+</style>
+{% endblock %}

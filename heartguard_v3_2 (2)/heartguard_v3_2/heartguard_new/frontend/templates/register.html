@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="min-height:calc(100vh - 70px); display:flex; align-items:center; justify-content:center; padding:2rem 1rem;">
+  <div style="width:100%; max-width:520px;">
+
+    <div class="glass-card anim-scale-in" style="border-radius:var(--radius-2xl); padding:2.5rem; position:relative; overflow:hidden;">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--rose),#a855f7,var(--blue));"></div>
+      <div style="position:absolute;top:-60px;left:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(59,130,246,0.08),transparent);border-radius:50%;pointer-events:none;"></div>
+
+      <!-- Header -->
+      <div style="text-align:center; margin-bottom:2rem;">
+        <div style="width:64px;height:64px;border-radius:1.25rem;background:linear-gradient(135deg,rgba(244,63,94,0.15),rgba(59,130,246,0.15));border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+        </div>
+        <h2 style="font-size:1.6rem; font-weight:800; margin-bottom:0.4rem;">Create Account</h2>
+        <p style="color:var(--text-dim); font-size:0.88rem;">Select your role and get started</p>
+      </div>
+
+      <form method="POST" action="{{ url_for('register') }}" id="regForm" style="display:flex; flex-direction:column; gap:1.1rem;">
+
+        <!-- Role Selector -->
+        <div>
+          <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.75rem;">I am a</label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+            <label style="cursor:pointer;">
+              <input type="radio" name="role" value="patient" class="peer" style="display:none;" checked onchange="updateTheme(this)">
+              <div id="patientCard" class="peer-role" style="text-align:center; padding:1.25rem 1rem; border-radius:1rem; border:2px solid rgba(244,63,94,0.5); background:rgba(244,63,94,0.08); transition:all 0.3s;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#f43f5e" style="margin:0 auto 0.5rem; display:block;"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4" fill="none" stroke="#f43f5e" stroke-width="2"/></svg>
+                <span style="font-size:0.88rem; font-weight:700; color:var(--rose-light);">Patient</span>
+              </div>
+            </label>
+            <label style="cursor:pointer;">
+              <input type="radio" name="role" value="doctor" class="peer" style="display:none;" onchange="updateTheme(this)">
+              <div id="doctorCard" class="peer-role" style="text-align:center; padding:1.25rem 1rem; border-radius:1rem; border:2px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.03); transition:all 0.3s;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7888a4" stroke-width="2" style="margin:0 auto 0.5rem; display:block;"><path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                <span style="font-size:0.88rem; font-weight:700; color:var(--text-dim);">Doctor</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Name & Email -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+          <div>
+            <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.5rem;">Full Name</label>
+            <input type="text" name="name" required placeholder="Your name" class="input-field" autocomplete="name">
+          </div>
+          <div>
+            <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.5rem;">Email</label>
+            <input type="email" name="email" required placeholder="you@example.com" class="input-field" autocomplete="email">
+          </div>
+        </div>
+
+        <div>
+          <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.5rem;">WhatsApp Number</label>
+          <input type="text" name="phone_number" required placeholder="+91XXXXXXXXXX" class="input-field">
+        </div>
+
+        <!-- Doctor Specialty -->
+        <div id="specialty_section" class="hidden">
+          <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.5rem;">Specialty</label>
+          <select name="specialty" class="input-field input-field-blue">
+            <option>Interventional Cardiologist</option>
+            <option>Electrophysiologist</option>
+            <option>Clinical Cardiologist</option>
+            <option>Pediatric Cardiologist</option>
+            <option>Cardiothoracic Surgeon</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.5rem;">Password</label>
+          <input type="password" name="password" required placeholder="Min. 6 characters" class="input-field" autocomplete="new-password">
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn btn-rose" style="width:100%; padding:0.85rem; font-size:0.95rem; margin-top:0.25rem;">
+          Create Patient Account
+        </button>
+      </form>
+
+      <div style="text-align:center; margin-top:1.5rem; font-size:0.88rem; color:var(--text-dim);">
+        Already have an account?
+        <a href="{{ url_for('login') }}" style="color:var(--rose-light); font-weight:600; margin-left:0.25rem;">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function updateTheme(radio) {
+  const spec = document.getElementById('specialty_section');
+  const btn  = document.getElementById('submitBtn');
+  const pc   = document.getElementById('patientCard');
+  const dc   = document.getElementById('doctorCard');
+
+  if (radio.value === 'doctor') {
+    spec.classList.remove('hidden');
+    btn.className = 'btn btn-blue';
+    btn.style.cssText = 'width:100%; padding:0.85rem; font-size:0.95rem; margin-top:0.25rem;';
+    btn.textContent  = 'Create Doctor Account';
+    pc.style.borderColor = 'rgba(255,255,255,0.1)';
+    pc.style.background  = 'rgba(255,255,255,0.03)';
+    dc.style.borderColor = 'rgba(59,130,246,0.5)';
+    dc.style.background  = 'rgba(59,130,246,0.08)';
+    dc.querySelector('span').style.color = 'var(--blue-light)';
+    dc.querySelector('svg').setAttribute('stroke', '#3b82f6');
+    pc.querySelector('span').style.color = 'var(--text-dim)';
+  } else {
+    spec.classList.add('hidden');
+    btn.className = 'btn btn-rose';
+    btn.style.cssText = 'width:100%; padding:0.85rem; font-size:0.95rem; margin-top:0.25rem;';
+    btn.textContent  = 'Create Patient Account';
+    dc.style.borderColor = 'rgba(255,255,255,0.1)';
+    dc.style.background  = 'rgba(255,255,255,0.03)';
+    pc.style.borderColor = 'rgba(244,63,94,0.5)';
+    pc.style.background  = 'rgba(244,63,94,0.08)';
+    pc.querySelector('span').style.color = 'var(--rose-light)';
+    dc.querySelector('span').style.color = 'var(--text-dim)';
+  }
+}
+
+const params = new URLSearchParams(window.location.search);
+if (params.get('role') === 'doctor') {
+  const dr = document.querySelector('input[value="doctor"]');
+  if (dr) { dr.checked = true; updateTheme(dr); }
+}
+</script>
+{% endblock %}

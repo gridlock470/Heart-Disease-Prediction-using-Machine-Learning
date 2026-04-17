@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto mt-10 px-4 anim-fade-up">
+    <div class="glass rounded-3xl p-8 border border-slate-700/30 mb-8">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 pb-6 border-b border-slate-700/30 gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold">Patient Record</h2>
+                    <p class="text-slate-400 font-mono text-xs mt-1">ID: <span class="text-slate-200 font-bold">{{ patient.id }}</span></p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                {% if view_as_doctor %}
+                    <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-1a4 4 0 00-4-4h-2.5a4 4 0 00-4 4v1h10.5z"/></svg>
+                        Doctor View
+                    </span>
+                    <div class="glass rounded-lg p-3 border border-slate-700/30 text-center">
+                        <p class="text-xs text-slate-500 mb-2">Patient QR</p>
+                        <img src="{{ url_for('static', filename='qrcodes/patient_' + patient.id|string + '.png') }}" alt="Patient QR" class="w-20 h-20 rounded-lg opacity-90 invert" onerror="this.style.display='none'">
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700/50">
+                <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Name</p>
+                <p class="text-lg font-medium text-slate-200">{{ patient.name }}</p>
+            </div>
+            <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700/50">
+                <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Contact</p>
+                <p class="text-lg font-medium text-slate-200">{{ patient.phone_number or 'N/A' }}</p>
+            </div>
+            <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700/50">
+                <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Email</p>
+                <p class="text-lg font-medium text-slate-200 break-all">{{ patient.email }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medical Reports Section -->
+    <div class="mb-8">
+        <h3 class="text-2xl font-bold mb-6 flex items-center gap-2">
+            <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Medical Reports
+        </h3>
+        
+        {% if reports %}
+            <div class="space-y-4">
+                {% for record in reports %}
+                    <div class="glass rounded-2xl p-6 border border-slate-700/30 scroll-reveal">
+                        <div class="flex justify-between items-start mb-4 pb-4 border-b border-slate-700/30">
+                            <div>
+                                <span class="text-sm text-slate-400">{{ record.created_at.strftime('%B %d, %Y at %H:%M') }}</span>
+                                <p class="text-xs text-slate-500 mt-1">Report #{{ record.id }}</p>
+                            </div>
+                            <span class="px-3 py-1 {% if record.status == 'Verified' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20{% else %}bg-amber-500/10 text-amber-400 border border-amber-500/20{% endif %} rounded-full text-xs font-semibold">
+                                {{ '✓ Verified' if record.status == 'Verified' else '⏳ Pending' }}
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center mb-6">
+                            <div>
+                                <p class="text-xs text-slate-500">Prediction</p>
+                                <p class="font-bold text-lg {{ 'text-rose-400' if record.prediction_result == 1 else 'text-emerald-400' }}">
+                                    {{ 'HIGH RISK' if record.prediction_result == 1 else 'LOW RISK' }}
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500">Probability</p>
+                                <p class="font-bold text-lg text-slate-200">{{ (record.probability * 100)|round(1) }}%</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500">Age</p>
+                                <p class="font-bold text-lg text-slate-200">{{ record.age }}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500">BP (mm Hg)</p>
+                                <p class="font-bold text-lg text-slate-200">{{ record.trestbps }}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500">Cholesterol</p>
+                                <p class="font-bold text-lg text-slate-200">{{ record.chol }}</p>
+                            </div>
+                        </div>
+
+                        <!-- More Details -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-slate-400 bg-slate-800/30 p-4 rounded-lg">
+                            <div><span class="text-slate-600">Heart Rate:</span> {{ record.thalach }} bpm</div>
+                            <div><span class="text-slate-600">Chest Pain:</span> {{ record.cp }}</div>
+                            <div><span class="text-slate-600">Resting ECG:</span> {{ record.restecg }}</div>
+                            <div><span class="text-slate-600">Exercise Angina:</span> {{ 'Yes' if record.exang else 'No' }}</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="glass rounded-2xl p-12 border border-slate-700/30 text-center">
+                <svg class="w-16 h-16 mx-auto text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <p class="text-slate-400 text-lg">No medical reports available for this patient</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Medical Files Section -->
+    {% if medical_files %}
+    <div>
+        <h3 class="text-2xl font-bold mb-6 flex items-center gap-2">
+            <svg class="w-6 h-6 text-teal-400" fill="currentColor" viewBox="0 0 20 20"><path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/><path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z"/></svg>
+            Uploaded Medical Documents ({{ medical_files|length }})
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for file in medical_files %}
+                <div class="glass rounded-2xl p-6 border border-teal-500/20 hover:border-teal-500/40 transition scroll-reveal">
+                    <div class="flex items-start gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-lg bg-teal-500/20 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-teal-400" fill="currentColor" viewBox="0 0 20 20"><path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-white line-clamp-2">{{ file.original_filename }}</p>
+                            <p class="text-xs text-teal-400">{{ file.document_type }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if file.description %}
+                    <p class="text-xs text-slate-400 mb-3 line-clamp-2">{{ file.description }}</p>
+                    {% endif %}
+                    
+                    <div class="text-xs text-slate-500 mb-3 pb-3 border-t border-slate-700/30 pt-3">
+                        <p>Uploaded: {{ file.created_at.strftime('%d %b %Y') }}</p>
+                        <p>Size: {{ (file.file_size / 1024 / 1024)|round(2) }} MB</p>
+                    </div>
+                    
+                    {% if view_as_doctor %}
+                        <a href="{{ url_for('download_file', file_id=file.id) }}" class="w-full py-2 px-3 bg-teal-500/20 hover:bg-teal-500/30 text-teal-400 rounded-lg text-sm font-medium transition text-center">
+                            Download File
+                        </a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

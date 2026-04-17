@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12">
+
+  <!-- Header -->
+  <div class="anim-fade-up" style="margin-bottom:2rem;">
+    <h1 style="font-size:2rem; font-weight:800;">My <span class="text-grad-rose">Account</span></h1>
+    <p style="color:var(--text-dim); margin-top:0.4rem;">Manage your profile, security, and preferences</p>
+  </div>
+
+  <div style="display:grid; grid-template-columns:280px 1fr; gap:1.5rem; align-items:start;" class="account-grid">
+
+    <!-- ══ Left: Profile Card ══ -->
+    <div class="anim-fade-up delay-1">
+      <div class="glass-card" style="border-radius:var(--radius-2xl); padding:2rem; text-align:center;">
+        <!-- Avatar -->
+        <div style="display:flex; justify-content:center; margin-bottom:1.25rem;">
+          <div class="avatar-ring">
+            {{ current_user.name[0].upper() }}
+          </div>
+        </div>
+
+        <h2 style="font-size:1.2rem; font-weight:700; margin-bottom:0.25rem;">{{ current_user.name }}</h2>
+        <p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:1rem;">{{ current_user.email }}</p>
+
+        <div style="display:flex; justify-content:center; margin-bottom:1.5rem;">
+          {% if current_user.role == 'patient' %}
+            <span class="badge badge-rose">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Patient
+            </span>
+          {% else %}
+            <span class="badge badge-blue">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+              {{ current_user.specialty or 'Doctor' }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Stats -->
+        <div style="background:rgba(6,11,24,0.5); border-radius:1rem; padding:1.25rem; margin-bottom:1.5rem;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div>
+              <div style="font-size:1.5rem; font-weight:800; color:var(--rose-light);">{{ reports_count }}</div>
+              <div style="font-size:0.7rem; color:var(--text-dim);">Reports</div>
+            </div>
+            <div>
+              <div style="font-size:1.5rem; font-weight:800; color:#60a5fa;">{{ current_user.role|title }}</div>
+              <div style="font-size:0.7rem; color:var(--text-dim);">Role</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div style="display:flex; flex-direction:column; gap:0.5rem;">
+          <a href="{{ url_for('dashboard') }}" class="btn btn-ghost" style="font-size:0.85rem; padding:0.6rem 1rem;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Dashboard
+          </a>
+          {% if current_user.role == 'patient' and current_user.patient_uuid %}
+          <a href="{{ url_for('patient_record', patient_uuid=current_user.patient_uuid) }}" class="btn btn-ghost" style="font-size:0.85rem; padding:0.6rem 1rem;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            My Record
+          </a>
+          {% endif %}
+          <a href="{{ url_for('logout') }}" style="font-size:0.85rem; padding:0.6rem 1rem; text-align:center; color:var(--rose-light); transition:color 0.2s;">
+            Sign Out
+          </a>
+        </div>
+      </div>
+
+      <!-- QR Card for Patients -->
+      {% if current_user.role == 'patient' and current_user.patient_uuid %}
+      <div class="glass-card" style="border-radius:var(--radius-2xl); padding:1.5rem; text-align:center; margin-top:1rem;">
+        <p style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.5rem; font-weight:700;">Patient QR Code</p>
+        <p style="font-size:1.5rem; font-weight:800; color:var(--rose-light); margin-bottom:1rem;">ID: {{ current_user.id }}</p>
+        <img src="{{ url_for('static', filename='qrcodes/patient_' + current_user.id|string + '.png') }}"
+             alt="Patient QR Code"
+             style="width:100px; height:100px; border-radius:0.75rem; margin:0 auto; display:block; image-rendering:pixelated; filter:invert(1);"
+             onerror="this.style.display='none'">
+        <p style="font-size:0.75rem; color:var(--text-dim); margin-top:0.75rem;">Doctors can scan this to access your medical history</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- ══ Right: Forms ══ -->
+    <div style="display:flex; flex-direction:column; gap:1.25rem;">
+
+      <!-- Edit Profile -->
+      <div class="glass-card anim-fade-up delay-2" style="border-radius:var(--radius-2xl); padding:2rem; position:relative; overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--rose),var(--purple));"></div>
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.75rem;">
+          <div style="width:36px;height:36px;border-radius:0.75rem;background:rgba(244,63,94,0.15);display:flex;align-items:center;justify-content:center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <h3 style="font-size:1.05rem; font-weight:700;">Edit Profile</h3>
+        </div>
+
+        <form method="POST" action="{{ url_for('account') }}">
+          <input type="hidden" name="action" value="update_profile">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+            <div>
+              <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.5rem;">Full Name</label>
+              <input type="text" name="name" value="{{ current_user.name }}" class="input-field" placeholder="Your name">
+            </div>
+            <div>
+              <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.5rem;">Email</label>
+              <input type="email" value="{{ current_user.email }}" class="input-field" disabled style="opacity:0.5; cursor:not-allowed;">
+            </div>
+          </div>
+          <div style="margin-bottom:1.5rem;">
+            <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.5rem;">WhatsApp Number</label>
+            <input type="text" name="phone_number" value="{{ current_user.phone_number or '' }}" class="input-field" placeholder="+91XXXXXXXXXX">
+          </div>
+          <button type="submit" class="btn btn-rose" style="font-size:0.9rem; padding:0.65rem 1.75rem;" data-no-loader>
+            Save Changes
+          </button>
+        </form>
+      </div>
+
+      <!-- Change Password -->
+      <div class="glass-card anim-fade-up delay-3" style="border-radius:var(--radius-2xl); padding:2rem; position:relative; overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--teal));"></div>
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.75rem;">
+          <div style="width:36px;height:36px;border-radius:0.75rem;background:rgba(59,130,246,0.15);display:flex;align-items:center;justify-content:center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          </div>
+          <h3 style="font-size:1.05rem; font-weight:700;">Change Password</h3>
+        </div>
+
+        <form method="POST" action="{{ url_for('account') }}">
+          <input type="hidden" name="action" value="change_password">
+          <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:1.5rem;">
+            <div>
+              <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.5rem;">Current Password</label>
+              <input type="password" name="current_password" class="input-field input-field-blue" placeholder="••••••••" required>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+              <div>
+                <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.5rem;">New Password</label>
+                <input type="password" name="new_password" class="input-field input-field-blue" placeholder="••••••••" required>
+              </div>
+              <div>
+                <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.5rem;">Confirm New</label>
+                <input type="password" name="confirm_password" class="input-field input-field-blue" placeholder="••••••••" required>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-blue" style="font-size:0.9rem; padding:0.65rem 1.75rem;" data-no-loader>
+            Update Password
+          </button>
+        </form>
+      </div>
+
+      <!-- Account Info -->
+      <div class="glass-card anim-fade-up delay-4" style="border-radius:var(--radius-2xl); padding:2rem;">
+        <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:1.25rem;">Account Details</h3>
+        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+          {% for label, value in [
+            ('Account Type', current_user.role|title),
+            ('Email', current_user.email),
+            ('Phone', current_user.phone_number or 'Not set'),
+            ('Reports', reports_count|string),
+          ] + ([('Specialty', current_user.specialty)] if current_user.role == 'doctor' else []) %}
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 1rem; background:rgba(6,11,24,0.4); border-radius:0.75rem;">
+            <span style="font-size:0.82rem; color:var(--text-dim); font-weight:600;">{{ label }}</span>
+            <span style="font-size:0.85rem; color:var(--text-main);">{{ value }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+@media(max-width:768px){
+  .account-grid { grid-template-columns:1fr !important; }
+}
+</style>
+{% endblock %}

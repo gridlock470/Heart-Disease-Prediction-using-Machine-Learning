@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12">
+
+  <!-- Header -->
+  <div style="text-align:center; margin-bottom:3.5rem;">
+    <div class="anim-fade-up" style="margin-bottom:1rem;">
+      <span class="badge badge-blue" style="font-size:0.8rem;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Help Center
+      </span>
+    </div>
+    <h1 class="anim-fade-up delay-1" style="font-size:2.5rem; font-weight:800; margin-bottom:1rem;">
+      How can we <span class="text-grad-rose">help you?</span>
+    </h1>
+    <p class="anim-fade-up delay-2" style="color:var(--text-dim); font-size:1rem; max-width:480px; margin:0 auto;">
+      Find answers to common questions about HeartGuard AI
+    </p>
+  </div>
+
+  <!-- Quick Links -->
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; margin-bottom:3.5rem;">
+    {% for emoji, label, anchor in [
+      ('🚀','Getting Started','#getting-started'),
+      ('🔮','AI Assessment','#assessment'),
+      ('👨‍⚕️','Doctor Portal','#doctors'),
+      ('🔐','Account & Security','#security'),
+      ('📩','Notifications','#notifications'),
+      ('🤝','Contact Us','/contact'),
+    ] %}
+    <a href="{{ anchor }}" class="glass-card reveal card-hover" style="border-radius:1.25rem; padding:1.25rem; text-align:center; display:block; transition-delay:{{ loop.index0 * 0.06 }}s;">
+      <div style="font-size:1.75rem; margin-bottom:0.5rem;">{{ emoji }}</div>
+      <span style="font-size:0.82rem; font-weight:600; color:var(--text-dim);">{{ label }}</span>
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- ══ FAQ Sections ══ -->
+  {% set sections = [
+    ('getting-started', '🚀', 'Getting Started', [
+      ('What is HeartGuard AI?', 'HeartGuard AI is an intelligent cardiac risk assessment platform powered by a 6-model machine learning ensemble trained on over 1,302 clinical records. It allows patients to assess their heart disease risk and connect with certified cardiologists for review.'),
+      ('How do I create an account?', 'Click "Get Started" in the navbar and choose your role — Patient or Doctor. Fill in your name, email, WhatsApp number, and password. Patients receive a secure QR-linked medical profile; doctors get access to the review dashboard.'),
+      ('Is HeartGuard AI free to use?', 'Yes, creating an account and taking assessments is free. The platform connects patients with doctors for professional report verification at no additional charge.'),
+      ('What browsers are supported?', 'HeartGuard works on all modern browsers — Chrome, Firefox, Safari, Edge — on desktop, tablet, and mobile devices.'),
+    ]),
+    ('assessment', '🔮', 'AI Heart Assessment', [
+      ('What data does the assessment need?', 'The assessment requires 13 clinical vitals: age, sex, chest pain type, resting blood pressure, cholesterol, fasting blood sugar, resting ECG, maximum heart rate, exercise-induced angina, ST depression (oldpeak), slope of ST segment, number of major vessels, and thalassemia type.'),
+      ('How accurate is the AI prediction?', 'Our 6-model soft-voting ensemble achieves strong accuracy through 5-fold cross-validation on 5 merged clinical datasets (1,302+ records). Probability scores indicate risk level — but always consult a doctor for clinical decisions.'),
+      ('What happens after I submit my assessment?', 'Your report goes to "Pending" status. A registered doctor will review the AI analysis, verify it, and send you a certified PDF report via email and WhatsApp with clinical recommendations.'),
+      ('Can I take multiple assessments?', 'Yes — each submission creates a new report entry. Your history is available in the Patient Dashboard, letting you track changes over time.'),
+    ]),
+    ('doctors', '👨‍⚕️', 'Doctor Portal', [
+      ('How does a doctor review reports?', 'Doctors see all pending AI-generated patient reports in their dashboard. They can review detailed vitals, the AI prediction, and historical reports. Clicking "Verify" marks the report and triggers patient notification.'),
+      ('What notifications do doctors send?', 'Upon verification, HeartGuard automatically sends the patient a certified PDF medical report via email (Gmail SMTP) and WhatsApp (Twilio API), if credentials are configured in the .env file.'),
+      ('How do I register as a doctor?', 'On the registration page, select "Doctor" and choose your specialty from the dropdown. Doctor accounts are otherwise identical to patient registration.'),
+    ]),
+    ('security', '🔐', 'Account & Security', [
+      ('How is my data protected?', 'All passwords are hashed using Werkzeug\'s PBKDF2-SHA256 algorithm. Patient records are linked by unique UUID tokens, not names. The database uses SQLite with Flask-SQLAlchemy ORM. Google OAuth is supported for secure login.'),
+      ('I forgot my password. What do I do?', 'Click "Forgot password?" on the login page. Enter your email and we\'ll send a 6-digit reset code (valid for 1 hour) to your registered address. Then set your new password on the reset page.'),
+      ('Can I delete my account?', 'Please contact us via the Contact page to request account deletion. We\'ll process it within 48 hours.'),
+      ('Is Google login available?', 'Yes — if the administrator has configured a Google OAuth Client ID in the .env file, a "Sign in with Google" button appears on the login page.'),
+    ]),
+    ('notifications', '📩', 'Notifications', [
+      ('How do email notifications work?', 'HeartGuard uses Gmail SMTP (or any SMTP provider) configured in the .env file. When a doctor verifies your report, a PDF is generated and emailed automatically.'),
+      ('Do I get WhatsApp messages?', 'Yes — if Twilio credentials are set up by the admin, you\'ll receive a WhatsApp message with your report PDF link when your report is verified. Make sure your number includes the country code (e.g. +91).'),
+      ('Why didn\'t I receive my report?', 'Check spam/junk folders first. If the admin hasn\'t configured SMTP or Twilio credentials, notifications are skipped. Contact us via the contact page for help.'),
+    ]),
+  ] %}
+
+  {% for anchor, emoji, section_title, faqs in sections %}
+  <div id="{{ anchor }}" style="margin-bottom:3rem;">
+    <div class="reveal" style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.25rem;">
+      <span style="font-size:1.4rem;">{{ emoji }}</span>
+      <h2 style="font-size:1.3rem; font-weight:800;">{{ section_title }}</h2>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:0.75rem;">
+      {% for question, answer in faqs %}
+      <div class="faq-item glass-card reveal" style="transition-delay:{{ loop.index0 * 0.07 }}s;">
+        <button class="faq-question" type="button">
+          <span>{{ question }}</span>
+          <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">
+          {{ answer }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- Still need help -->
+  <div class="glass-rose reveal" style="border-radius:var(--radius-2xl); padding:2.5rem; text-align:center; margin-top:2rem;">
+    <div style="width:56px;height:56px;border-radius:50%;background:rgba(244,63,94,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;animation:heart-beat 1.4s infinite;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#f43f5e"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/></svg>
+    </div>
+    <h3 style="font-size:1.3rem; font-weight:800; margin-bottom:0.75rem;">Still need help?</h3>
+    <p style="color:var(--text-dim); margin-bottom:1.5rem; font-size:0.9rem;">Our team is ready to assist you with any questions.</p>
+    <a href="{{ url_for('contact') }}" class="btn btn-rose" style="font-size:0.95rem; padding:0.8rem 2rem;">Contact Us →</a>
+  </div>
+
+</div>
+{% endblock %}

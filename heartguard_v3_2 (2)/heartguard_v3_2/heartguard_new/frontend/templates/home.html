@@ -1,0 +1,475 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- ══════════════════════════════════════════════════════════════
+     HERO SECTION with Real Heart Images
+══════════════════════════════════════════════════════════════ -->
+<section class="hero-section px-6">
+  <!-- Real Medical Heart Image - Healthy Heart -->
+  <div class="hero-3d-heart" style="max-width:480px; margin:0 auto; position:relative;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Heart_diagram-en.svg/800px-Heart_diagram-en.svg.png" 
+         alt="Healthy Heart Anatomy"
+         class="heart-image"
+         style="width:100%; height:auto; opacity:0.95; border-radius:20px;">
+    <div style="position:absolute; bottom:20px; left:20px; background:rgba(20,184,166,0.9); padding:0.75rem 1.5rem; border-radius:50px; font-size:0.9rem; font-weight:600; color:white; backdrop-filter:blur(10px);">
+      ✓ Healthy Heart Functions
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto w-full relative z-10">
+    <div class="max-w-2xl">
+      <!-- Badge -->
+      <div class="anim-fade-up" style="margin-bottom:1.5rem;">
+        <span class="badge badge-rose" style="font-size:0.8rem; padding:0.45rem 1rem;">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--rose);display:inline-block;animation:heart-beat 1.4s infinite;"></span>
+          AI-Powered Clinical Diagnostics
+        </span>
+      </div>
+
+      <!-- Headline -->
+      <h1 class="anim-fade-up delay-1" style="font-size:clamp(2.8rem,6vw,4.5rem); line-height:1.08; letter-spacing:-0.03em; margin-bottom:1.5rem;">
+        Smarter<br>
+        <span class="text-grad-multi">Heart Health</span><br>
+        Starts Here
+      </h1>
+
+      <p class="anim-fade-up delay-2" style="font-size:1.1rem; color:var(--text-dim); line-height:1.75; max-width:520px; margin-bottom:2.5rem;">
+        HeartGuard uses a 6-model ML ensemble trained on 1,302+ clinical records to predict heart disease risk with clinical-grade accuracy.
+      </p>
+
+      <!-- CTA Buttons -->
+      <div class="anim-fade-up delay-3" style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:3rem;">
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('dashboard') }}" class="btn btn-rose" style="font-size:1rem; padding:0.85rem 2rem;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Go to Dashboard
+          </a>
+          {% if current_user.role == 'patient' %}
+            <a href="{{ url_for('predict') }}" class="btn btn-ghost" style="font-size:1rem; padding:0.85rem 2rem;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Take Assessment
+            </a>
+          {% endif %}
+        {% else %}
+          <a href="{{ url_for('register') }}" class="btn btn-rose" style="font-size:1rem; padding:0.85rem 2rem;">
+            Get Started Free
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+          <a href="{{ url_for('login') }}" class="btn btn-ghost" style="font-size:1rem; padding:0.85rem 2rem;">Sign In</a>
+        {% endif %}
+      </div>
+
+      <!-- Stat Pills -->
+      <div class="anim-fade-up delay-4" style="display:flex; gap:1.5rem; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#f43f5e"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/></svg>
+          <span style="font-size:0.85rem; color:var(--text-dim);">1,302+ records</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span style="font-size:0.85rem; color:var(--text-dim);">6 ML models</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span style="font-size:0.85rem; color:var(--text-dim);">5-fold validated</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ECG Line at bottom -->
+  <div class="hero-ecg-line">
+    <canvas id="ecgCanvas" style="width:100%;height:80px;"></canvas>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     STATS BAR
+══════════════════════════════════════════════════════════════ -->
+<section style="padding:2rem 1.5rem;">
+  <div class="max-w-5xl mx-auto">
+    <div class="glass-card" style="border-radius:var(--radius-2xl); padding:2rem 2.5rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(130px,1fr)); gap:2rem;">
+      {% for stat in [
+        ('1,302+','Patient Records','♥'),
+        ('5','Clinical Datasets','🧬'),
+        ('6','ML Models','🤖'),
+        ('13','Vital Metrics','📊'),
+        ('5-Fold','Cross Validated','✓')
+      ] %}
+      <div class="reveal text-center" style="transition-delay:{{ loop.index0 * 0.1 }}s;">
+        <div style="font-size:2rem; margin-bottom:0.25rem;">{{ stat[2] }}</div>
+        <div class="text-grad-rose" style="font-family:'Syne',sans-serif; font-size:1.6rem; font-weight:800;">{{ stat[0] }}</div>
+        <div style="font-size:0.78rem; color:var(--text-dim); margin-top:0.25rem;">{{ stat[1] }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     3D HEART ICON SLIDER (auto-scrolling)
+══════════════════════════════════════════════════════════════ -->
+<section style="padding:4rem 0; overflow:hidden;">
+  <div style="text-align:center; margin-bottom:2.5rem; padding:0 1.5rem;">
+    <h2 class="reveal" style="font-size:2rem; font-weight:800; margin-bottom:0.5rem;">
+      Heart Health <span class="text-grad-rose">Intelligence</span>
+    </h2>
+    <p class="reveal" style="color:var(--text-dim); font-size:0.95rem;">Everything you need to monitor, predict and protect</p>
+  </div>
+
+  <div class="heart-slider-wrapper">
+    <!-- Fade edges -->
+    <div style="position:absolute;left:0;top:0;bottom:0;width:120px;background:linear-gradient(90deg,var(--bg-deep),transparent);z-index:10;pointer-events:none;"></div>
+    <div style="position:absolute;right:0;top:0;bottom:0;width:120px;background:linear-gradient(-90deg,var(--bg-deep),transparent);z-index:10;pointer-events:none;"></div>
+
+    <div class="heart-slider-track" id="heartTrack">
+      {% set slides = [
+        ('#f43f5e','M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z','AI Prediction','6-model ensemble predicts risk in seconds','rgba(244,63,94,0.1)'),
+        ('#3b82f6','M22 12h-4l-3 9L9 3l-3 9H2','ECG Analysis','Real-time electrocardiogram monitoring','rgba(59,130,246,0.1)'),
+        ('#14b8a6','M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z','Doctor Review','Verified by certified cardiologists','rgba(20,184,166,0.1)'),
+        ('#a855f7','M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z','PDF Reports','Downloadable clinical-grade reports','rgba(168,85,247,0.1)'),
+        ('#f59e0b','M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9','Smart Alerts','Email & WhatsApp notifications','rgba(245,158,11,0.1)'),
+        ('#f43f5e','M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z','Risk Scoring','Probability-based cardiac risk levels','rgba(244,63,94,0.1)'),
+        ('#3b82f6','M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z','Patient Records','Secure QR-linked medical profiles','rgba(59,130,246,0.1)'),
+        ('#14b8a6','M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z','Data Insights','Cross-dataset analytics & EDA','rgba(20,184,166,0.1)'),
+      ] %}
+
+      {% for color, path, title, desc, bg in slides %}
+      <div class="heart-slide-card tilt-card" style="background:{{ bg }}; border-color:{{ color }}22;">
+        <div class="slide-icon-3d">
+          <svg viewBox="0 0 24 24" width="52" height="52" fill="none" stroke="{{ color }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 12px {{ color }}55);">
+            <path d="{{ path }}"/>
+          </svg>
+        </div>
+        <div class="slide-title">{{ title }}</div>
+        <div class="slide-desc">{{ desc }}</div>
+      </div>
+      {% endfor %}
+
+      <!-- Duplicate for seamless loop -->
+      {% for color, path, title, desc, bg in slides %}
+      <div class="heart-slide-card tilt-card" style="background:{{ bg }}; border-color:{{ color }}22;">
+        <div class="slide-icon-3d">
+          <svg viewBox="0 0 24 24" width="52" height="52" fill="none" stroke="{{ color }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 12px {{ color }}55);">
+            <path d="{{ path }}"/>
+          </svg>
+        </div>
+        <div class="slide-title">{{ title }}</div>
+        <div class="slide-desc">{{ desc }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     HOW IT WORKS — 3-PANEL FEATURE SLIDER
+══════════════════════════════════════════════════════════════ -->
+<section style="padding:5rem 1.5rem;">
+  <div class="max-w-7xl mx-auto">
+    <div style="text-align:center; margin-bottom:3rem;">
+      <p class="reveal" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:var(--rose); margin-bottom:0.75rem;">How It Works</p>
+      <h2 class="reveal" style="font-size:2.2rem; font-weight:800;">Three Steps to <span class="text-grad-rose">Cardiac Clarity</span></h2>
+    </div>
+
+    <div class="feature-slider reveal" id="featureSlider">
+      <!-- Slider Buttons -->
+      <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-bottom:1rem;">
+        <button class="slider-btn slider-prev">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="slider-btn slider-next">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+
+      <div class="feature-slider-inner" style="overflow:hidden; border-radius:var(--radius-2xl);">
+        <!-- Slide 1: Register -->
+        <div class="feature-slide glass-card tilt-card" style="min-width:calc(33.333% - 1rem);">
+          <div style="width:56px;height:56px;border-radius:1rem;background:rgba(244,63,94,0.15);border:1px solid rgba(244,63,94,0.25);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="badge badge-rose" style="margin-bottom:1rem;">Step 01</div>
+          <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:0.75rem;">Create Your Profile</h3>
+          <p style="color:var(--text-dim); font-size:0.9rem; line-height:1.7;">Register as a patient or doctor. Patients get a secure QR-linked medical profile. Doctors gain access to the review dashboard.</p>
+          <div style="margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.06);">
+            <a href="{{ url_for('register') }}" class="btn btn-outline-rose" style="font-size:0.85rem; padding:0.5rem 1.25rem;">Register Now →</a>
+          </div>
+        </div>
+
+        <!-- Slide 2: Assessment -->
+        <div class="feature-slide glass-card tilt-card" style="min-width:calc(33.333% - 1rem);">
+          <div style="width:56px;height:56px;border-radius:1rem;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.25);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="badge badge-blue" style="margin-bottom:1rem;">Step 02</div>
+          <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:0.75rem;">Take the Assessment</h3>
+          <p style="color:var(--text-dim); font-size:0.9rem; line-height:1.7;">Enter 13 clinical vitals — age, cholesterol, BP, ECG readings and more. Our ML ensemble computes your risk instantly.</p>
+          <div style="margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.06);">
+            {% if current_user.is_authenticated and current_user.role == 'patient' %}
+              <a href="{{ url_for('predict') }}" class="btn btn-blue" style="font-size:0.85rem; padding:0.5rem 1.25rem;">Start Assessment →</a>
+            {% else %}
+              <a href="{{ url_for('register') }}?role=patient" class="btn btn-blue" style="font-size:0.85rem; padding:0.5rem 1.25rem;">Learn More →</a>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Slide 3: Report -->
+        <div class="feature-slide glass-card tilt-card" style="min-width:calc(33.333% - 1rem);">
+          <div style="width:56px;height:56px;border-radius:1rem;background:rgba(20,184,166,0.15);border:1px solid rgba(20,184,166,0.25);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <div class="badge badge-green" style="margin-bottom:1rem;">Step 03</div>
+          <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:0.75rem;">Get Your Report</h3>
+          <p style="color:var(--text-dim); font-size:0.9rem; line-height:1.7;">A cardiologist reviews your AI report. Get a certified PDF sent directly to your email and WhatsApp with recommendations.</p>
+          <div style="margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.06);">
+            <a href="{{ url_for('help_page') }}" class="btn btn-ghost" style="font-size:0.85rem; padding:0.5rem 1.25rem; border:1px solid rgba(20,184,166,0.3); color:#2dd4bf;">Learn More →</a>
+          </div>
+        </div>
+
+        <!-- Slide 4: ML Models -->
+        <div class="feature-slide glass-card tilt-card" style="min-width:calc(33.333% - 1rem);">
+          <div style="width:56px;height:56px;border-radius:1rem;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.25);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+          </div>
+          <div class="badge" style="background:rgba(168,85,247,0.15);color:#c084fc;border:1px solid rgba(168,85,247,0.25);margin-bottom:1rem;">ML Core</div>
+          <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:0.75rem;">6-Model Ensemble</h3>
+          <p style="color:var(--text-dim); font-size:0.9rem; line-height:1.7;">HistGradient Boosting, Random Forest, SVM, Logistic Regression and more — soft-voted for maximum accuracy.</p>
+          <div style="margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.06);">
+            <a href="/api/model_info" class="btn btn-ghost" style="font-size:0.85rem; padding:0.5rem 1.25rem; border:1px solid rgba(168,85,247,0.3); color:#c084fc;">Model API →</a>
+          </div>
+        </div>
+
+        <!-- Slide 5: Security -->
+        <div class="feature-slide glass-card tilt-card" style="min-width:calc(33.333% - 1rem);">
+          <div style="width:56px;height:56px;border-radius:1rem;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.25);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="badge badge-amber" style="margin-bottom:1rem;">Security</div>
+          <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:0.75rem;">Private & Secure</h3>
+          <p style="color:var(--text-dim); font-size:0.9rem; line-height:1.7;">All data encrypted at rest. Patient records protected by unique UUID tokens. Google OAuth supported.</p>
+          <div style="margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.06);">
+            <a href="{{ url_for('contact') }}" class="btn btn-ghost" style="font-size:0.85rem; padding:0.5rem 1.25rem; border:1px solid rgba(245,158,11,0.3); color:#fcd34d;">Contact Team →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dots -->
+      <div class="slider-controls">
+        <div class="slider-dot active"></div>
+        <div class="slider-dot"></div>
+        <div class="slider-dot"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     HEART HEALTH INFO SLIDER (second slider)
+══════════════════════════════════════════════════════════════ -->
+<section style="padding:4rem 1.5rem; background:rgba(13,21,37,0.4);">
+  <div class="max-w-7xl mx-auto">
+    <div style="text-align:center; margin-bottom:3rem;">
+      <h2 class="reveal" style="font-size:2rem; font-weight:800;">Know Your <span class="text-grad-rose">Heart</span></h2>
+      <p class="reveal" style="color:var(--text-dim); margin-top:0.5rem;">Key cardiac health indicators we analyse</p>
+    </div>
+
+    <div class="feature-slider reveal" id="infoSlider">
+      <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-bottom:1rem;">
+        <button class="slider-btn slider-prev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button class="slider-btn slider-next"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+
+      <div class="feature-slider-inner" style="overflow:hidden; border-radius:var(--radius-2xl);">
+        {% set infos = [
+          ('Blood Pressure','Systolic pressure over 140 mmHg is a primary risk factor for coronary artery disease.','#f43f5e','M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z'),
+          ('Cholesterol','LDL > 200 mg/dL significantly raises plaque buildup risk in arteries.','#3b82f6','M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'),
+          ('Max Heart Rate','A reduced thalach during exercise stress test is a strong predictor.','#14b8a6','M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z'),
+          ('Chest Pain Type','Four clinical types from typical angina to asymptomatic presentations.','#a855f7','M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'),
+          ('ST Depression','Oldpeak measures ischemia: ST depression induced by exercise relative to rest.','#f59e0b','M13 10V3L4 14h7v7l9-11h-7z'),
+          ('Blood Sugar','Fasting blood sugar >120 mg/dl significantly correlates with diabetic heart risk.','#f43f5e','M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z'),
+        ] %}
+        {% for title, desc, color, path in infos %}
+        <div class="feature-slide tilt-card" style="min-width:calc(33.333% - 1rem); background:linear-gradient(135deg,{{ color }}0d,rgba(13,21,37,0.8)); border:1px solid {{ color }}22; border-radius:var(--radius-2xl); padding:2rem;">
+          <div style="width:48px;height:48px;border-radius:0.875rem;background:{{ color }}1a;border:1px solid {{ color }}33;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ color }}" stroke-width="2" stroke-linecap="round"><path d="{{ path }}"/></svg>
+          </div>
+          <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:0.6rem; color:var(--text-main);">{{ title }}</h3>
+          <p style="color:var(--text-dim); font-size:0.87rem; line-height:1.7;">{{ desc }}</p>
+          <div style="margin-top:1.25rem; height:4px; border-radius:2px; background:rgba(255,255,255,0.06); overflow:hidden;">
+            <div style="height:100%; width:70%; background:linear-gradient(90deg,{{ color }},{{ color }}88); border-radius:2px; animation:shimmer-rotate 3s ease infinite;"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="slider-controls">
+        <div class="slider-dot active"></div>
+        <div class="slider-dot"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     HEART HEALTH COMPARISON: Healthy vs Diseased
+══════════════════════════════════════════════════════════════ -->
+<section style="padding:5rem 1.5rem;">
+  <div class="max-w-6xl mx-auto">
+    <div style="text-align:center; margin-bottom:3rem;">
+      <p class="reveal" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:var(--rose); margin-bottom:0.75rem;">Understand the Difference</p>
+      <h2 class="reveal" style="font-size:2.2rem; font-weight:800;">Healthy Heart <span class="text-grad-rose">vs. Disease</span></h2>
+      <p class="reveal" style="color:var(--text-dim); font-size:1rem; margin-top:0.75rem; max-width:600px; margin-left:auto; margin-right:auto;">See real medical illustrations of what a healthy heart looks like compared to conditions that increase disease risk.</p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-top:2.5rem;" class="max-sm:grid-cols-1">
+      
+      <!-- Healthy Heart Card -->
+      <div class="glass-card reveal tilt-card heart-comparison-card" style="border-radius:var(--radius-2xl); padding:0; overflow:hidden; border:1px solid rgba(20,184,166,0.3);">
+        <div style="background:linear-gradient(135deg, rgba(20,184,166,0.1), rgba(16,185,129,0.05)); border-bottom:1px solid rgba(20,184,166,0.2); padding:1.5rem; text-align:center;">
+          <div style="display:inline-block; background:rgba(20,184,166,0.15); border:1px solid rgba(20,184,166,0.3); padding:0.75rem 1.5rem; border-radius:50px; margin-bottom:1rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#14b8a6" style="display:inline; margin-right:0.5rem;"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span style="color:#2dd4bf; font-weight:600; font-size:0.85rem;">Healthy</span>
+          </div>
+          <h3 style="font-size:1.3rem; font-weight:700; margin:0; color:#2dd4bf;">Normal Heart Function</h3>
+        </div>
+        <div style="padding:1.5rem; text-align:center;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Heart_diagram-en.svg/800px-Heart_diagram-en.svg.png" 
+               alt="Healthy Heart"
+               class="heart-image heart-healthy"
+               style="width:100%; max-width:280px; height:auto; margin:0 auto 1.5rem; border-radius:12px;">
+          <div style="background:rgba(20,184,166,0.08); border-left:3px solid #14b8a6; padding:1rem; border-radius:8px; text-align:left;">
+            <p style="font-size:0.9rem; color:var(--text-dim); margin:0.5rem 0;">
+              ✓ Strong regular heartbeat<br>
+              ✓ Optimal blood circulation<br>
+              ✓ No valve problems<br>
+              ✓ Normal cholesterol levels<br>
+              ✓ Healthy blood pressure
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Diseased Heart Card -->
+      <div class="glass-card reveal tilt-card heart-comparison-card" style="border-radius:var(--radius-2xl); padding:0; overflow:hidden; border:1px solid rgba(244,63,94,0.3); transition-delay:0.15s;">
+        <div style="background:linear-gradient(135deg, rgba(244,63,94,0.1), rgba(239,68,68,0.05)); border-bottom:1px solid rgba(244,63,94,0.2); padding:1.5rem; text-align:center;">
+          <div style="display:inline-block; background:rgba(244,63,94,0.15); border:1px solid rgba(244,63,94,0.3); padding:0.75rem 1.5rem; border-radius:50px; margin-bottom:1rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#f43f5e" style="display:inline; margin-right:0.5rem;"><path d="M17 14.5v-1a3 3 0 00-3-3H7m0 0a3 3 0 00-3 3v1"/></svg>
+            <span style="color:#f87171; font-weight:600; font-size:0.85rem;">At Risk</span>
+          </div>
+          <h3 style="font-size:1.3rem; font-weight:700; margin:0; color:#f87171;">Heart Disease Signs</h3>
+        </div>
+        <div style="padding:1.5rem; text-align:center;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Heart_attack_coronary.svg/800px-Heart_attack_coronary.svg.png" 
+               alt="Diseased Heart"
+               class="heart-image heart-diseased"
+               style="width:100%; max-width:280px; height:auto; margin:0 auto 1.5rem; border-radius:12px;">
+          <div style="background:rgba(244,63,94,0.08); border-left:3px solid #f43f5e; padding:1rem; border-radius:8px; text-align:left;">
+            <p style="font-size:0.9rem; color:var(--text-dim); margin:0.5rem 0;">
+              ✗ Irregular heartbeat<br>
+              ✗ Plaque buildup (atherosclerosis)<br>
+              ✗ Reduced blood flow<br>
+              ✗ High cholesterol<br>
+              ✗ Elevated blood pressure
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Why HeartGuard Matters -->
+    <div class="glass-card reveal" style="margin-top:2.5rem; padding:2rem 2.5rem; border-radius:var(--radius-2xl); background:linear-gradient(135deg, rgba(59,130,246,0.08), rgba(99,102,241,0.04)); border:1px solid rgba(59,130,246,0.15);">
+      <div style="text-align:center;">
+        <h3 style="font-size:1.3rem; font-weight:700; margin-bottom:1rem;">Why Early Detection Matters</h3>
+        <p style="color:var(--text-dim); font-size:0.95rem; margin-bottom:1.5rem; max-width:700px; margin-left:auto; margin-right:auto;">
+          Heart disease develops gradually. Early detection before symptoms appear can prevent serious complications. HeartGuard's 6-model ML ensemble analyzes your clinical vitals to identify risk patterns years before traditional tests would. Our AI has been trained on 1,302+ verified clinical records and achieves clinical-grade accuracy.
+        </p>
+        <div style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; margin-top:1.5rem;">
+          <div style="flex:1; min-width:200px; padding:1rem; background:rgba(59,130,246,0.1); border-radius:12px; text-align:center;">
+            <div style="font-size:1.5rem; font-weight:800; color:#60a5fa;">1,302+</div>
+            <div style="font-size:0.85rem; color:var(--text-dim); margin-top:0.25rem;">Clinical Records Analysed</div>
+          </div>
+          <div style="flex:1; min-width:200px; padding:1rem; background:rgba(20,184,166,0.1); border-radius:12px; text-align:center;">
+            <div style="font-size:1.5rem; font-weight:800; color:#2dd4bf;">6</div>
+            <div style="font-size:0.85rem; color:var(--text-dim); margin-top:0.25rem;">Advanced ML Models</div>
+          </div>
+          <div style="flex:1; min-width:200px; padding:1rem; background:rgba(168,85,247,0.1); border-radius:12px; text-align:center;">
+            <div style="font-size:1.5rem; font-weight:800; color:#c084fc;">5-Fold</div>
+            <div style="font-size:0.85rem; color:var(--text-dim); margin-top:0.25rem;">Cross-Validation Tested</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     ROLE CTA SECTION
+══════════════════════════════════════════════════════════════ -->
+<section style="padding:5rem 1.5rem;">
+  <div class="max-w-5xl mx-auto">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;" class="max-sm:grid-cols-1">
+
+      <!-- Patient Card -->
+      <div class="glass-rose reveal tilt-card" style="border-radius:var(--radius-2xl); padding:2.5rem; position:relative; overflow:hidden;">
+        <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(244,63,94,0.2),transparent);border-radius:50%;"></div>
+        <div style="width:56px;height:56px;border-radius:1rem;background:rgba(244,63,94,0.2);border:1px solid rgba(244,63,94,0.3);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <h3 style="font-size:1.5rem; font-weight:800; margin-bottom:0.75rem;">I'm a Patient</h3>
+        <p style="color:var(--text-dim); font-size:0.9rem; line-height:1.7; margin-bottom:2rem;">Take the AI-powered cardiac assessment, track your history, and receive certified medical reports from cardiologists.</p>
+        <a href="{{ url_for('register') }}?role=patient" class="btn btn-rose">Get My Heart Score →</a>
+      </div>
+
+      <!-- Doctor Card -->
+      <div class="glass-blue reveal tilt-card" style="border-radius:var(--radius-2xl); padding:2.5rem; position:relative; overflow:hidden; transition-delay:0.1s;">
+        <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(59,130,246,0.2),transparent);border-radius:50%;"></div>
+        <div style="width:56px;height:56px;border-radius:1rem;background:rgba(59,130,246,0.2);border:1px solid rgba(59,130,246,0.3);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+        </div>
+        <h3 style="font-size:1.5rem; font-weight:800; margin-bottom:0.75rem;">I'm a Doctor</h3>
+        <p style="color:var(--text-dim); font-size:0.9rem; line-height:1.7; margin-bottom:2rem;">Review AI-generated patient reports, verify diagnoses, and send certified medical PDFs via email and WhatsApp.</p>
+        <a href="{{ url_for('register') }}?role=doctor" class="btn btn-blue">Access Doctor Dashboard →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 3rd Slider: Animated Heart Facts ══ -->
+<section style="padding:3rem 0; overflow:hidden; border-top:1px solid rgba(255,255,255,0.04);">
+  <div class="heart-slider-wrapper" style="padding:2rem 0;">
+    <div style="position:absolute;left:0;top:0;bottom:0;width:80px;background:linear-gradient(90deg,var(--bg-deep),transparent);z-index:10;pointer-events:none;"></div>
+    <div style="position:absolute;right:0;top:0;bottom:0;width:80px;background:linear-gradient(-90deg,var(--bg-deep),transparent);z-index:10;pointer-events:none;"></div>
+
+    <!-- Reverse direction slider -->
+    <div style="display:flex; gap:1.5rem; width:max-content; animation:slide-infinite-reverse 25s linear infinite;">
+      {% set facts = [
+        ('❤️','Heart beats 100,000× a day'),('🩸','Pumps 2,000 gallons daily'),('⚡','ECG invented in 1903'),('🧬','Heart has its own nervous system'),('💊','CAD affects 18M Americans'),('🏃','Exercise reduces risk by 35%'),('🍎','Diet controls 80% of risk factors'),('💤','Poor sleep raises risk by 48%'),('🧘','Stress management saves lives'),('🔬','AI detects risk years earlier'),
+      ] %}
+      {% for emoji, fact in facts %}
+      <div style="flex:0 0 auto; padding:0.75rem 1.5rem; border-radius:var(--radius-pill); background:rgba(13,21,37,0.6); border:1px solid rgba(255,255,255,0.07); white-space:nowrap; font-size:0.88rem; color:var(--text-dim); display:flex; align-items:center; gap:0.6rem; backdrop-filter:blur(12px);">
+        <span style="font-size:1.1rem;">{{ emoji }}</span> {{ fact }}
+      </div>
+      {% endfor %}
+      {% for emoji, fact in facts %}
+      <div style="flex:0 0 auto; padding:0.75rem 1.5rem; border-radius:var(--radius-pill); background:rgba(13,21,37,0.6); border:1px solid rgba(255,255,255,0.07); white-space:nowrap; font-size:0.88rem; color:var(--text-dim); display:flex; align-items:center; gap:0.6rem; backdrop-filter:blur(12px);">
+        <span style="font-size:1.1rem;">{{ emoji }}</span> {{ fact }}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<style>
+@keyframes slide-infinite-reverse {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+.max-sm\:grid-cols-1 { }
+@media(max-width:640px) {
+  [style*="grid-template-columns:1fr 1fr"] { grid-template-columns:1fr !important; }
+}
+</style>
+
+{% endblock %}

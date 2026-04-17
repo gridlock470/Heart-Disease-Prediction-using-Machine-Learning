@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-6 py-10">
+    
+    <!-- Header -->
+    <div class="text-center mb-10 anim-fade-up">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-semibold uppercase tracking-wider mb-4">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/><path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z"/></svg>
+            Medical Documents
+        </div>
+        <h1 class="text-3xl font-bold mb-3">Share Your Medical Reports</h1>
+        <p class="text-slate-400 text-lg max-w-2xl mx-auto">
+            Upload your existing medical reports, lab results, and diagnostic images for doctors to review alongside your AI assessment.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Upload Section -->
+        <div class="lg:col-span-2">
+            <div class="glass rounded-2xl p-8 border border-rose-500/20 scroll-reveal">
+                <h2 class="text-xl font-bold mb-6">Upload Medical Documents</h2>
+
+                <form method="POST" action="{{ url_for('upload_medical_file') }}" enctype="multipart/form-data" class="space-y-6">
+                    
+                    <!-- File Type Selection -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-300 mb-3">Document Type</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            {% for doc_type in ['Lab Report', 'CT/MRI Scan', 'X-Ray', 'ECG Report', 'Medical History', 'Prescription', 'Other'] %}
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="document_type" value="{{ doc_type }}" class="hidden peer">
+                                    <div class="p-3 border-2 border-slate-700 rounded-lg text-center text-sm font-medium text-slate-400 peer-checked:border-rose-500 peer-checked:bg-rose-500/10 peer-checked:text-rose-400 transition">
+                                        {{ doc_type }}
+                                    </div>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div>
+                        <label for="file" class="block text-sm font-semibold text-slate-300 mb-3">Select File</label>
+                        <div id="dropZone" class="border-2 border-dashed border-rose-500/30 rounded-2xl p-8 text-center cursor-pointer hover:border-rose-500/60 hover:bg-rose-500/5 transition">
+                            <input type="file" id="file" name="file" required accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="hidden">
+                            
+                            <svg class="w-12 h-12 mx-auto mb-3 text-rose-400/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                            
+                            <p class="text-slate-300 font-medium">Drag and drop your file here</p>
+                            <p class="text-slate-500 text-sm mt-1">or click to select (PDF, JPG, PNG, DOC - Max 10MB)</p>
+                        </div>
+                        <p id="fileName" class="text-sm text-slate-500 mt-2"></p>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label for="description" class="block text-sm font-semibold text-slate-300 mb-3">Notes (Optional)</label>
+                        <textarea id="description" name="description" rows="3" placeholder="Add any relevant notes about this document..." 
+                                  class="w-full px-4 py-3 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-rose-500 transition"></textarea>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" class="w-full py-3 px-4 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-rose-500/40 transition flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                        Upload Document
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="space-y-6">
+            <!-- What to Upload -->
+            <div class="glass rounded-2xl p-6 border border-slate-700/30 scroll-reveal">
+                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-teal-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zm-11-1a1 1 0 11-2 0 1 1 0 012 0zM8 7a1 1 0 000 2h6a1 1 0 000-2H8zm0 3a1 1 0 000 2h6a1 1 0 000-2H8z" clip-rule="evenodd"/></svg>
+                    What to Upload
+                </h3>
+                <ul class="space-y-3 text-sm text-slate-400">
+                    <li class="flex items-start gap-3">
+                        <span class="text-teal-400 font-bold mt-0.5">✓</span>
+                        <span>Lab reports (cholesterol, BP, etc.)</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-teal-400 font-bold mt-0.5">✓</span>
+                        <span>CT/MRI and X-Ray scans</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-teal-400 font-bold mt-0.5">✓</span>
+                        <span>ECG and stress test results</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-teal-400 font-bold mt-0.5">✓</span>
+                        <span>Family medical history</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Benefits -->
+            <div class="glass rounded-2xl p-6 border border-slate-700/30 scroll-reveal">
+                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"/></svg>
+                    Benefits
+                </h3>
+                <ul class="space-y-3 text-sm text-slate-400">
+                    <li class="flex items-start gap-3">
+                        <span class="text-blue-400">📊</span>
+                        <span>Doctors get complete patient context</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-blue-400">🔍</span>
+                        <span>Better analysis and recommendations</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-blue-400">⏱️</span>
+                        <span>Faster report verification</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-blue-400">🔒</span>
+                        <span>All data stays private and secure</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Your Uploaded Files -->
+    <div class="mt-12">
+        <h2 class="text-2xl font-bold mb-6">Your Uploaded Documents</h2>
+        {% if patient_files %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for file in patient_files %}
+                    <div class="glass rounded-2xl p-6 border border-slate-700/30 hover:border-slate-600/50 transition scroll-reveal">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/><path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z"/></svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-white">{{ file.filename }}</p>
+                                    <p class="text-xs text-slate-500">{{ file.document_type }}</p>
+                                </div>
+                            </div>
+                            <button onclick="deleteFile({{ file.id }})" class="text-slate-500 hover:text-red-400 transition">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                            </button>
+                        </div>
+
+                        <p class="text-xs text-slate-400 mb-4 line-clamp-2">{{ file.description or 'No description' }}</p>
+
+                        <div class="flex items-center justify-between pt-4 border-t border-slate-700/30">
+                            <p class="text-xs text-slate-500">{{ file.created_at.strftime('%d %b %Y') }}</p>
+                            <a href="{{ url_for('download_file', file_id=file.id) }}" class="text-blue-400 hover:text-blue-300 text-sm font-medium">
+                                Download ↓
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="glass rounded-3xl p-16 border border-slate-700/30 text-center">
+                <div class="w-20 h-20 mx-auto rounded-full bg-slate-800/50 flex items-center justify-center mb-6">
+                    <svg class="w-10 h-10 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-slate-300 mb-2">No Documents Yet</h3>
+                <p class="text-slate-500">Upload your medical reports to help doctors provide better analysis.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('file');
+
+// Drag and drop
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('bg-rose-500/10', 'border-rose-500/60');
+});
+
+dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('bg-rose-500/10', 'border-rose-500/60');
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('bg-rose-500/10', 'border-rose-500/60');
+    fileInput.files = e.dataTransfer.files;
+    updateFileName();
+});
+
+dropZone.addEventListener('click', () => {
+    fileInput.click();
+});
+
+fileInput.addEventListener('change', updateFileName);
+
+function updateFileName() {
+    const fileName = document.getElementById('fileName');
+    const file = fileInput.files[0];
+    if (file) {
+        const size = (file.size / 1024 / 1024).toFixed(2);
+        fileName.textContent = `📄 ${file.name} (${size} MB)`;
+    }
+}
+
+function deleteFile(fileId) {
+    if (confirm('Delete this file?')) {
+        window.location.href = `/delete_medical_file/${fileId}`;
+    }
+}
+</script>
+
+{% endblock %}

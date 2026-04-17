@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-6 py-10 anim-fade-up">
+    
+    <!-- Header -->
+    <div class="text-center mb-10">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-semibold uppercase tracking-wider mb-4">
+            <svg class="w-3 h-3 anim-heartbeat" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>
+            Clinical Assessment
+        </div>
+        <h2 class="text-3xl font-bold mb-2">Heart Disease Risk Assessment</h2>
+        <p class="text-slate-500 max-w-lg mx-auto">Fill in your clinical metrics below. Our AI model will analyze your data and generate a detailed report.</p>
+    </div>
+
+    <!-- ══ Heart Anatomy Guide ══ -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 scroll-reveal">
+        <!-- Heart Diagram -->
+        <div class="glass rounded-2xl p-6 border border-slate-700/30 flex flex-col items-center justify-center anatomy-guide">
+            <h3 class="text-lg font-semibold mb-4">Heart Anatomy</h3>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Heart_diagram-en.svg/800px-Heart_diagram-en.svg.png" 
+                 alt="Heart Anatomy"
+                 class="heart-image"
+                 style="width:100%; max-width:280px; height:auto; margin:1rem 0;">
+            <p style="text-align:center; color:var(--text-dim); font-size:0.9rem; margin-top:1rem;">The heart's chambers (atria & ventricles) pump blood through major vessels. Our assessment measures how well your heart is functioning.</p>
+        </div>
+
+        <!-- What We Measure -->
+        <div class="glass rounded-2xl p-6 border border-slate-700/30">
+            <h3 class="text-lg font-semibold mb-4">What We Measure</h3>
+            <div style="display:grid; gap:1rem;">
+                <div style="padding:1rem; background:rgba(244,63,94,0.08); border-left:3px solid #f43f5e; border-radius:8px;">
+                    <p style="font-weight:600; margin:0 0 0.25rem 0; color:#f87171;">Blood Pressure (BP)</p>
+                    <p style="font-size:0.9rem; color:var(--text-dim); margin:0;">The force of blood against vessel walls</p>
+                </div>
+                <div style="padding:1rem; background:rgba(59,130,246,0.08); border-left:3px solid #3b82f6; border-radius:8px;">
+                    <p style="font-weight:600; margin:0 0 0.25rem 0; color:#60a5fa;">Cholesterol</p>
+                    <p style="font-size:0.9rem; color:var(--text-dim); margin:0;">Fatty substance that can clog arteries</p>
+                </div>
+                <div style="padding:1rem; background:rgba(20,184,166,0.08); border-left:3px solid #14b8a6; border-radius:8px;">
+                    <p style="font-weight:600; margin:0 0 0.25rem 0; color:#2dd4bf;">ECG (Electrocardiogram)</p>
+                    <p style="font-size:0.9rem; color:var(--text-dim); margin:0;">Electrical activity of your heart</p>
+                </div>
+                <div style="padding:1rem; background:rgba(168,85,247,0.08); border-left:3px solid #a855f7; border-radius:8px;">
+                    <p style="font-weight:600; margin:0 0 0.25rem 0; color:#c084fc;">Heart Rate</p>
+                    <p style="font-size:0.9rem; color:var(--text-dim); margin:0;">How many times your heart beats per minute</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('predict') }}">
+        <div class="glass rounded-3xl border border-rose-500/10 overflow-hidden shadow-2xl">
+
+            <!-- Section 1: Demographics -->
+            <div class="p-8 border-b border-slate-700/30 scroll-reveal">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded-lg bg-rose-500/20 border border-rose-500/20 flex items-center justify-center text-rose-400 font-bold text-sm">1</div>
+                    <h3 class="text-lg font-semibold">Demographics</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Age</label>
+                        <input type="number" name="age" min="1" max="120" required placeholder="e.g. 55" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Sex</label>
+                        <select name="sex" required class="input-field appearance-none">
+                            <option value="1">Male</option>
+                            <option value="0">Female</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Vitals -->
+            <div class="p-8 border-b border-slate-700/30 scroll-reveal">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded-lg bg-rose-500/20 border border-rose-500/20 flex items-center justify-center text-rose-400 font-bold text-sm">2</div>
+                    <h3 class="text-lg font-semibold">Vitals &amp; Blood Tests</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Resting BP (mm Hg)</label>
+                        <input type="number" name="trestbps" required placeholder="e.g. 130" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Cholesterol (mg/dl)</label>
+                        <input type="number" name="chol" required placeholder="e.g. 240" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Fasting Blood Sugar &gt;120</label>
+                        <select name="fbs" required class="input-field appearance-none">
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Heart -->
+            <div class="p-8 border-b border-slate-700/30 scroll-reveal">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded-lg bg-rose-500/20 border border-rose-500/20 flex items-center justify-center text-rose-400 font-bold text-sm">3</div>
+                    <h3 class="text-lg font-semibold">Heart &amp; ECG Metrics</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Chest Pain (0–3)</label>
+                        <input type="number" name="cp" min="0" max="3" required placeholder="0-3" class="input-field">
+                        <p class="text-[10px] text-slate-600 mt-1">0=Typical 1=Atypical 2=Non-anginal 3=Asymptomatic</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Resting ECG (0–2)</label>
+                        <input type="number" name="restecg" min="0" max="2" required placeholder="0-2" class="input-field">
+                        <p class="text-[10px] text-slate-600 mt-1">0=Normal 1=ST-T 2=Hypertrophy</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Max Heart Rate</label>
+                        <input type="number" name="thalach" required placeholder="e.g. 150" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Exercise Angina</label>
+                        <select name="exang" required class="input-field appearance-none">
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Stress Test -->
+            <div class="p-8 border-b border-slate-700/30 scroll-reveal">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded-lg bg-rose-500/20 border border-rose-500/20 flex items-center justify-center text-rose-400 font-bold text-sm">4</div>
+                    <h3 class="text-lg font-semibold">Advanced Stress Test</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Oldpeak (ST Depr.)</label>
+                        <input type="number" step="0.1" name="oldpeak" required placeholder="e.g. 1.0" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Slope (0–2)</label>
+                        <input type="number" name="slope" min="0" max="2" required placeholder="0-2" class="input-field">
+                        <p class="text-[10px] text-slate-600 mt-1">0=Up 1=Flat 2=Down</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Major Vessels (0–3)</label>
+                        <input type="number" name="ca" min="0" max="3" required placeholder="0-3" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Thalassemia (1–3)</label>
+                        <input type="number" name="thal" min="1" max="3" required placeholder="1-3" class="input-field">
+                        <p class="text-[10px] text-slate-600 mt-1">1=Normal 2=Fixed 3=Reversible</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="p-8">
+                <button type="submit" class="w-full py-4 btn-rose text-lg flex items-center justify-center gap-3 group">
+                    <svg class="w-6 h-6 anim-heartbeat" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>
+                    Generate AI Prediction Report
+                    <svg class="w-5 h-5 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+                <p class="text-center text-xs text-slate-600 mt-4">Your report will be reviewed by an available doctor before being sent to you.</p>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
